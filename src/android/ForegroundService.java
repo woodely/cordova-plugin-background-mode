@@ -26,6 +26,7 @@ import android.annotation.TargetApi;
 import android.app.*;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.Binder;
@@ -53,7 +54,7 @@ public class ForegroundService extends Service {
 
     // Default text of the background notification
     private static final String NOTIFICATION_TEXT =
-            "Doing heavy tasks.";
+            "App is running in background";
 
     // Default icon of the background notification
     private static final String NOTIFICATION_ICON = "icon";
@@ -126,7 +127,11 @@ public class ForegroundService extends Service {
         boolean isSilent    = settings.optBoolean("silent", false);
 
         if (!isSilent) {
-            startForeground(NOTIFICATION_ID, makeNotification());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(NOTIFICATION_ID, makeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+            } else {
+                startForeground(NOTIFICATION_ID, makeNotification());
+            }
         }
 
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
