@@ -26,7 +26,7 @@ import android.annotation.TargetApi;
 import android.app.*;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ServiceInfo
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.Binder;
