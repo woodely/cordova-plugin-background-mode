@@ -3,19 +3,19 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-background-mode"
-        version="0.7.3">
+        version="0.7.10">
 
     <name>BackgroundMode</name>
 
     <description>Prevent apps from going to sleep in background.</description>
 
-    <repo>https://github.com/woodely/cordova-plugin-background-mode.git</repo>
+    <repo>https://github.com/katzer/cordova-plugin-background-mode.git</repo>
 
     <keywords>appplant, background</keywords>
 
     <license>Apache 2.0</license>
 
-    <author>woodely</author>
+    <author>Sebastián Katzer</author>
 
     <!-- dependencies -->
     <dependency id="cordova-plugin-device" />
@@ -71,7 +71,11 @@
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
-            <service android:name="de.appplant.cordova.plugin.background.ForegroundService" />
+            <service
+              android:name="de.appplant.cordova.plugin.background.ForegroundService"
+              android:foregroundServiceType="dataSync"
+              android:exported="false">
+            </service>
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
