@@ -226,6 +226,10 @@ public class ForegroundService extends Service {
             notification.addAction(closeAction.build());
         }
 
+        if(Build.VERSION.SDK_INT >= 26){
+            notification.setChannelId(CHANNEL_ID);
+        }
+
         if (settings.optBoolean("hidden", true)) {
             notification.setPriority(Notification.PRIORITY_MIN);
         }
