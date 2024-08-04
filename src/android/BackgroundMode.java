@@ -78,7 +78,8 @@ public class BackgroundMode extends CordovaPlugin {
         }
     };
 
-    @Override
+    // Removed: It caused the issue with showing the foreground service notifcation message
+    /*@Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         IntentFilter filter = new IntentFilter();
@@ -94,7 +95,7 @@ public class BackgroundMode extends CordovaPlugin {
             cordova.getActivity().finish();
 
         }
-    };
+    };*/
 
     /**
      * Executes the request.
