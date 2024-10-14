@@ -172,8 +172,11 @@ NSString* const kAPPBackgroundEventDeactivate = @"deactivate";
 
     // Play music even in background and dont stop playing music
     // even another app starts playing sound
+    // 20241014 fixed issue causing background music pause
+    // ref: https://github.com/katzer/cordova-plugin-background-mode/issues/437
     [session setCategory:AVAudioSessionCategoryPlayback
-                   error:NULL];
+    withOptions:AVAudioSessionCategoryOptionMixWithOthers
+    error:NULL];
 
     // Active the audio session
     [session setActive:YES error:NULL];
