@@ -73,7 +73,7 @@
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <service
               android:name="de.appplant.cordova.plugin.background.ForegroundService"
-              android:foregroundServiceType="dataSync"
+              android:foregroundServiceType="location"
               android:exported="false">
             </service>
         </config-file>
