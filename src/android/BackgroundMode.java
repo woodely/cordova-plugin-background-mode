@@ -1,5 +1,5 @@
 /*
- Copyright 2013 Sebastián Katzer
+ Copyright 2013 Sebastian Katzer
 
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -25,6 +25,7 @@ import android.app.Activity;
 import android.content.*;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Build;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -264,7 +265,12 @@ public class BackgroundMode extends CordovaPlugin {
         try {
             context.bindService(intent, connection, BIND_AUTO_CREATE);
             fireEvent(Event.ACTIVATE, null);
-            context.startService(intent);
+            // Use startForegroundService on Android O+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent);
+            } else {
+                context.startService(intent);
+            }
         } catch (Exception e) {
             fireEvent(Event.FAILURE, String.format("'%s'", e.getMessage()));
         }
