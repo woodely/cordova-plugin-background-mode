@@ -117,6 +117,26 @@ public class ForegroundService extends Service {
     }
 
     /**
+     * Called by the system when the dataSync foreground service exceeds its
+     * time limit (Android 15+). Must call stopSelf() immediately.
+     */
+    @Override
+    public void onTimeout(int startId, int fgsType) {
+        super.onTimeout(startId, fgsType);
+        // Clean up and stop immediately to avoid RemoteServiceException
+        sleepWell();
+        stopSelf();
+    }
+
+    /**
+     * Older single-parameter overload for broader device compatibility.
+     */
+    @Override
+    public void onTimeout(int startId) {
+        onTimeout(startId, 0);
+    }
+
+    /**
      * Put the service in a foreground state to prevent app from being killed
      * by the OS.
      */
