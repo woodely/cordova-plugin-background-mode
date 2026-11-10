@@ -38,6 +38,10 @@ import androidx.core.app.NotificationCompat;
 
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 
+import java.security.Provider.Service;
+
+import javax.management.Notification;
+
 /**
  * Puts the service in a foreground state, where the system considers it to be
  * something the user is actively aware of and thus not a candidate for killing
@@ -113,6 +117,8 @@ public class ForegroundService extends Service {
      */
     @Override
     public int onStartCommand (Intent intent, int flags, int startId) {
+        // Must call startForeground quickly after startForegroundService()
+        keepAwake();
         return START_STICKY;
     }
 
@@ -141,30 +147,34 @@ public class ForegroundService extends Service {
      * by the OS.
      */
     @SuppressLint("WakelockTimeout")
-    private void keepAwake()
-    {
+    private void keepAwake() {
         JSONObject settings = BackgroundMode.getSettings();
-        boolean isSilent    = settings.optBoolean("silent", false);
+        boolean isSilent = settings.optBoolean("silent", false);
 
         if (!isSilent) {
             try {
+                Notification notification = makeNotification();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    startForeground(NOTIFICATION_ID, makeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+                    startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
                 } else {
-                    startForeground(NOTIFICATION_ID, makeNotification());
+                    startForeground(NOTIFICATION_ID, notification);
                 }
             } catch (Exception e) {
-                // Log and continue, or fall back to silent
-                e.printStackTrace();
+                // Fallback without type if typed start fails
+                try {
+                    startForeground(NOTIFICATION_ID, makeNotification());
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                }
             }
         }
 
-        PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
-
-        wakeLock = pm.newWakeLock(
-                PARTIAL_WAKE_LOCK, "backgroundmode:wakelock");
-
-        wakeLock.acquire();
+        // Acquire WakeLock only once
+        if (wakeLock == null) {
+            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+            wakeLock = pm.newWakeLock(PARTIAL_WAKE_LOCK, "backgroundmode:wakelock");
+            wakeLock.acquire();
+        }
     }
 
     /**
