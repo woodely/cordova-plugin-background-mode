@@ -38,10 +38,6 @@ import androidx.core.app.NotificationCompat;
 
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 
-import java.security.Provider.Service;
-
-import javax.management.Notification;
-
 /**
  * Puts the service in a foreground state, where the system considers it to be
  * something the user is actively aware of and thus not a candidate for killing
@@ -117,29 +113,7 @@ public class ForegroundService extends Service {
      */
     @Override
     public int onStartCommand (Intent intent, int flags, int startId) {
-        // Must call startForeground quickly after startForegroundService()
-        keepAwake();
         return START_STICKY;
-    }
-
-    /**
-     * Called by the system when the dataSync foreground service exceeds its
-     * time limit (Android 15+). Must call stopSelf() immediately.
-     */
-    @Override
-    public void onTimeout(int startId, int fgsType) {
-        super.onTimeout(startId, fgsType);
-        // Clean up and stop immediately to avoid RemoteServiceException
-        sleepWell();
-        stopSelf();
-    }
-
-    /**
-     * Older single-parameter overload for broader device compatibility.
-     */
-    @Override
-    public void onTimeout(int startId) {
-        onTimeout(startId, 0);
     }
 
     /**
@@ -147,34 +121,30 @@ public class ForegroundService extends Service {
      * by the OS.
      */
     @SuppressLint("WakelockTimeout")
-    private void keepAwake() {
+    private void keepAwake()
+    {
         JSONObject settings = BackgroundMode.getSettings();
-        boolean isSilent = settings.optBoolean("silent", false);
+        boolean isSilent    = settings.optBoolean("silent", false);
 
         if (!isSilent) {
             try {
-                Notification notification = makeNotification();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+                    startForeground(NOTIFICATION_ID, makeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
                 } else {
-                    startForeground(NOTIFICATION_ID, notification);
+                    startForeground(NOTIFICATION_ID, makeNotification());
                 }
             } catch (Exception e) {
-                // Fallback without type if typed start fails
-                try {
-                    startForeground(NOTIFICATION_ID, makeNotification());
-                } catch (Exception e2) {
-                    e2.printStackTrace();
-                }
+                // Log and continue, or fall back to silent
+                e.printStackTrace();
             }
         }
 
-        // Acquire WakeLock only once
-        if (wakeLock == null) {
-            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-            wakeLock = pm.newWakeLock(PARTIAL_WAKE_LOCK, "backgroundmode:wakelock");
-            wakeLock.acquire();
-        }
+        PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
+
+        wakeLock = pm.newWakeLock(
+                PARTIAL_WAKE_LOCK, "backgroundmode:wakelock");
+
+        wakeLock.acquire();
     }
 
     /**
